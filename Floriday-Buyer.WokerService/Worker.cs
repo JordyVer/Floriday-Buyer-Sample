@@ -1,4 +1,4 @@
-namespace Floriday_Buyer.WokerService
+namespace Floriday_Buyer.WorkerService
 {
     public class Worker : BackgroundService
     {

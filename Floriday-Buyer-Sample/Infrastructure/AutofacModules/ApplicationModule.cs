@@ -1,7 +1,8 @@
 ﻿using Autofac;
+using Axerrio.BB.DDD.Domain.Multitenancy;
 using Axerrio.BB.DDD.EntityFrameworkCore.Infrastructure.AutofacModules;
-using ProcessingQueue.Domain.Services;
-using ProcessingQueue.Domain.Services.Abstractions;
+using ProcessingQueue.Infrastructure;
+using ProcessingQueue.Infrastructure.Abstractions;
 
 namespace Floriday_Buyer_Sample.Infrastructure.AutofacModules
 {
@@ -13,7 +14,8 @@ namespace Floriday_Buyer_Sample.Infrastructure.AutofacModules
 
             builder.RegisterModule(new ClientRequestMediatorModule<Program>());
 
-            builder.RegisterType<ProcessingQueueItemService>().As<IProcessingQueueItemService>().InstancePerLifetimeScope();
+            builder.RegisterType<ProcessingQueueItemPublisher<TrustedTenant, TrustedTenantUser>>().As<IProcessingQueueItemPublisher>().InstancePerLifetimeScope();
+            builder.RegisterType<ProcessingQueueItemProcessing<TrustedTenant, TrustedTenantUser>>().As<IProcessingQueueItemProcessing>().InstancePerLifetimeScope();
         }
     }
 }

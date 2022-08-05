@@ -1,8 +1,8 @@
+using Axerrio.BB.AspNetCore.Infrastructure.ModelBinders.Request;
 using Floriday_Buyer_Sample.Application.Commands;
-using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using ProcessingQueue.Domain.Services.Abstractions;
+using ProcessingQueue.Infrastructure.Abstractions;
 
 namespace Floriday_Buyer_Sample.Controllers
 {
@@ -19,15 +19,27 @@ namespace Floriday_Buyer_Sample.Controllers
 
         [HttpPost(Name = "TestResult")]
         [Authorize]
-        public async Task<IResult> GetTestResultAsync([FromBody] CreateTestCommand command, [FromServices] IMediator mediator, [FromServices] IProcessingQueueItemService processingQueueItemService)
+        public async Task<IResult> GetTestResultAsync([FromBody] CreateTestCommand command, [FromServices] IProcessingQueueItemPublisher publisher)
         {
-            // gets tenant id and tenantuser id
+            await publisher.PublishAsync(command.TestKey.ToString(), command, RequestId.Create());
 
-            // inserts record into processingqueue
+            return Results.Ok("published command successfully");
+        }
 
-            await processingQueueItemService.AddAsync(command.TestKey.ToString(), command);
+        [HttpGet("preprocess")]
+        public async Task<IResult> GetRecordsForPreprocessing([FromServices] IProcessingQueueItemProcessing processor)
+        {
+            var items = await processor.GetEventsForPreprocessingAsync();
+            return Results.Ok(items);
+        }
 
-            return await mediator.Send(command);
+        [HttpPost("skipped/{key}")]
+        public async Task<IResult> MarkSkipped(int key, [FromServices] IProcessingQueueItemProcessing processor)
+        {
+            var items = await processor.GetEventsForPreprocessingAsync();
+            var item = items.Where(i => i.ProcessingQueueItemKey == key).FirstOrDefault();
+            await processor.MarkEventSkippedAsync(item);
+            return Results.Ok();
         }
     }
 }

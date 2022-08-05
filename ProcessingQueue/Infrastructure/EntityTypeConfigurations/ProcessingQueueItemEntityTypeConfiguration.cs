@@ -1,23 +1,28 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using EnsureThat;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using ProcessingQueue.Domain.Aggregates.ProcessingQueueItemAggregate;
+using ProcessingQueue.Domain.ProcessingQueueItems;
+using ProcessingQueue.Infrastructure.Options;
 
 namespace ProcessingQueue.Infrastructure.EntityTypeConfigurations
 {
     public class ProcessingQueueItemEntityTypeConfiguration : IEntityTypeConfiguration<ProcessingQueueItem>
     {
         private readonly string _schema;
+        private readonly string _tableName;
 
-        public ProcessingQueueItemEntityTypeConfiguration(string schema = "")
+        public ProcessingQueueItemEntityTypeConfiguration(ProcessingQueueItemDatabaseOptions options)
         {
-            _schema = schema;
+            _schema = EnsureArg.IsNotNullOrWhiteSpace(options.Schema, nameof(options.Schema));
+            _tableName = EnsureArg.IsNotNullOrWhiteSpace(options.TableName, nameof(options.TableName));
         }
 
         public void Configure(EntityTypeBuilder<ProcessingQueueItem> builder)
         {
-            builder.ToTable("ProcessingQueueItem", _schema);
+            builder.ToTable(_tableName, _schema);
             builder.HasKey(pqi => pqi.ProcessingQueueItemKey);
-            builder.Ignore(pqi => pqi.Identity);
+
+            builder.Property(pqi => pqi.Message).IsRequired(false);
         }
     }
 }

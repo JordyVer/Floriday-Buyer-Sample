@@ -1,19 +1,23 @@
-﻿using MediatR;
+﻿using Axerrio.BB.DDD.Application.Commands.Abstractions;
 
 namespace Floriday_Buyer_Sample.Application.Commands
 {
-    public class CreateTestCommand : IRequest<IResult>
+    public class CreateTestCommand : Command<CreateTestCommand>
     {
         public int TestKey { get; set; }
+
+        protected override IEnumerable<object> GetMemberValues()
+        {
+            yield return TestKey;
+        }
     }
 
-    public class CreateTestCommandHandler : IRequestHandler<CreateTestCommand, IResult>
+    public class CreateTestCommandHandler : CommandHandler<CreateTestCommand>
     {
-        async Task<IResult> IRequestHandler<CreateTestCommand, IResult>.Handle(CreateTestCommand request, CancellationToken cancellationToken)
+        public override async Task<CommandResult> Handle(CreateTestCommand command, CancellationToken cancellationToken = default)
         {
             await Task.Delay(100, cancellationToken);
-
-            return Results.NotFound("this result");
+            return new CommandResult.Ok(null, Guid.NewGuid(), 0);
         }
     }
 }

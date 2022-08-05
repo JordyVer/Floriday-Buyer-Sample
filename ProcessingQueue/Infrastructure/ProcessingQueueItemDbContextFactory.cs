@@ -1,10 +1,7 @@
-﻿using Axerrio.BB.DDD.EntityFrameworkCore.Infrastructure.ExecutionStrategy;
-using Axerrio.BB.DDD.Infrastructure.ExecutionStrategy.Abstractions;
-using Axerrio.BB.DDD.Infrastructure.Idempotency.Options;
-using MediatR;
+﻿using Axerrio.BB.DDD.Infrastructure.Idempotency.Options;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
-using Microsoft.Extensions.Logging;
+using ProcessingQueue.Infrastructure.Options;
 
 namespace ProcessingQueue.Infrastructure
 {
@@ -21,23 +18,13 @@ namespace ProcessingQueue.Infrastructure
                 Schema = schema
             };
 
-            var mediator = new Mediator(null);
-
-            var loggerFactory = LoggerFactory.Create(builder =>
+            var options = new ProcessingQueueItemDatabaseOptions()
             {
-                builder
-                    .AddFilter("Microsoft", LogLevel.Warning)
-                    .AddFilter("System", LogLevel.Warning)
-                    .AddFilter("LoggingConsoleApp.Program", LogLevel.Debug)
-                    .AddConsole()
-                    .AddEventLog();
-            });
+                Schema = "processing",
+                TableName = "ProcessingQueueItem"
+            };
 
-            var logger = loggerFactory.CreateLogger<ProcessingQueueItemDbContext>();
-
-            IDbExecutionStrategyFactory<ProcessingQueueItemDbContext> factory = new DbContextExecutionStrategyFactory<ProcessingQueueItemDbContext>();
-
-            return new ProcessingQueueItemDbContext(optionsBuilder.Options, mediator, logger, factory);
+            return new ProcessingQueueItemDbContext(optionsBuilder.Options, Microsoft.Extensions.Options.Options.Create(options));
         }
     }
 }

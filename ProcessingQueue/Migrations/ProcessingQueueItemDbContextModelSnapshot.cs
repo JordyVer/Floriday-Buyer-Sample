@@ -22,7 +22,7 @@ namespace ProcessingQueue.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder, 1L, 1);
 
-            modelBuilder.Entity("ProcessingQueue.Domain.Aggregates.ProcessingQueueItemAggregate.ProcessingQueueItem", b =>
+            modelBuilder.Entity("ProcessingQueue.Domain.ProcessingQueueItems.ProcessingQueueItem", b =>
                 {
                     b.Property<int>("ProcessingQueueItemKey")
                         .ValueGeneratedOnAdd()
@@ -57,6 +57,9 @@ namespace ProcessingQueue.Migrations
 
                     b.Property<DateTime>("InsertedTimestamp")
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("Message")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("ProcessAttempts")
                         .HasColumnType("int");

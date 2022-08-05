@@ -1,34 +1,31 @@
 ﻿using Axerrio.BB.DDD.EntityFrameworkCore.Infrastructure.Abstractions;
-using Axerrio.BB.DDD.Infrastructure.ExecutionStrategy.Abstractions;
-using MediatR;
+using EnsureThat;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
-using ProcessingQueue.Domain.Aggregates.ProcessingQueueItemAggregate;
-using ProcessingQueue.Infrastructure.Abstractions;
+using Microsoft.Extensions.Options;
+using ProcessingQueue.Domain.ProcessingQueueItems;
 using ProcessingQueue.Infrastructure.EntityTypeConfigurations;
+using ProcessingQueue.Infrastructure.Options;
 
 namespace ProcessingQueue.Infrastructure
 {
-    public class ProcessingQueueItemDbContext : DbContextUnitOfWork<ProcessingQueueItemDbContext>, IProcessingQueueItemDbContext
+    public class ProcessingQueueItemDbContext : DbContextUnitOfWork<ProcessingQueueItemDbContext>
     {
         public const string Schema = "processing";
         public DbSet<ProcessingQueueItem> ProcessingQueueItems { get; set; }
-
-        protected ProcessingQueueItemDbContext(DbContextOptions options) : base(options)
-        {
-        }
+        public ProcessingQueueItemDatabaseOptions ProcessingQueueItemDatabaseOptions { get; }
 
         private ProcessingQueueItemDbContext(DbContextOptions<ProcessingQueueItemDbContext> options) : base(options)
         {
         }
 
-        public ProcessingQueueItemDbContext(DbContextOptions<ProcessingQueueItemDbContext> options, IMediator mediator, ILogger<ProcessingQueueItemDbContext> logger, IDbExecutionStrategyFactory<ProcessingQueueItemDbContext> dbExecutionStrategyFactory) : base(options, mediator, logger, dbExecutionStrategyFactory)
+        public ProcessingQueueItemDbContext(DbContextOptions<ProcessingQueueItemDbContext> options, IOptions<ProcessingQueueItemDatabaseOptions> databaseOptions) : base(options)
         {
+            ProcessingQueueItemDatabaseOptions = EnsureArg.IsNotNull(databaseOptions, nameof(databaseOptions)).Value;
         }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
-            builder.ApplyConfiguration(new ProcessingQueueItemEntityTypeConfiguration(Schema));
+            builder.ApplyConfiguration(new ProcessingQueueItemEntityTypeConfiguration(ProcessingQueueItemDatabaseOptions));
         }
     }
 }

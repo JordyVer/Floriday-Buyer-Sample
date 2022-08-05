@@ -1,27 +1,22 @@
-﻿using Axerrio.BB.DDD.Domain.Abstractions;
-using EnsureThat;
-using System.Text.Json;
+﻿using System.Text.Json;
 
-namespace ProcessingQueue.Domain.Aggregates.ProcessingQueueItemAggregate
+namespace ProcessingQueue.Domain.ProcessingQueueItems
 {
-    public class ProcessingQueueItem : Entity<int>, IAggregateRoot
+    public class ProcessingQueueItem
     {
-        public int ProcessingQueueItemKey
-        {
-            get => Identity;
-            set => Identity = EnsureArg.IsGt(value, 0, nameof(ProcessingQueueItemKey));
-        }
+        public int ProcessingQueueItemKey { get; set; }
 
-        public ProcessingQueueItemState State { get; private set; }
+        public ProcessingQueueItemState State { get; set; }
 
-        public int ProcessAttempts { get; private set; }
-        public DateTime InsertedTimestamp { get; private set; }
-        public DateTime? ProcessedTimestamp { get; private set; }
-        public DateTime? FailedTimestamp { get; private set; }
-        public DateTime? SkippedTimestamp { get; private set; }
-        public DateTime? WaitingTimestamp { get; private set; }
-        public int WaitingForProcessingQueueItemId { get; private set; }
-        public DateTime? ReadyForProcessingTimestamp { get; private set; }
+        public int ProcessAttempts { get; set; }
+        public DateTime InsertedTimestamp { get; set; }
+        public DateTime? ProcessedTimestamp { get; set; }
+        public DateTime? FailedTimestamp { get; set; }
+        public DateTime? SkippedTimestamp { get; set; }
+        public DateTime? WaitingTimestamp { get; set; }
+        public int WaitingForProcessingQueueItemId { get; set; }
+        public DateTime? ReadyForProcessingTimestamp { get; set; }
+        public string Message { get; set; }
 
         public Guid EventId { get; private set; }
         public string EventInstanceKey { get; private set; }
@@ -30,8 +25,8 @@ namespace ProcessingQueue.Domain.Aggregates.ProcessingQueueItemAggregate
         public DateTime EventCreationTimestamp { get; private set; }
         public string EventContent { get; private set; }
 
-        public string TenantId { get; private set; }
-        public string TenantUserId { get; private set; }
+        public string TenantId { get; set; }
+        public string TenantUserId { get; set; }
 
         protected ProcessingQueueItem()
         {

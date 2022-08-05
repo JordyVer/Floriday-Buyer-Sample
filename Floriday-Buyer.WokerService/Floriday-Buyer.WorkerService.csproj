@@ -1,11 +1,11 @@
-<Project Sdk="Microsoft.NET.Sdk.Worker">
+﻿<Project Sdk="Microsoft.NET.Sdk.Worker">
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>dotnet-Floriday_Buyer.WokerService-639CFE12-7670-43EF-9A7B-081D72AC3BE1</UserSecretsId>
-    <RootNamespace>Floriday_Buyer.WokerService</RootNamespace>
+    <RootNamespace>Floriday_Buyer.WorkerService</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>

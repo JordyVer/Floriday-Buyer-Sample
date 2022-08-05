@@ -1,4 +1,4 @@
-using Floriday_Buyer.WokerService;
+using Floriday_Buyer.WorkerService;
 
 IHost host = Host.CreateDefaultBuilder(args)
     .ConfigureServices(services =>

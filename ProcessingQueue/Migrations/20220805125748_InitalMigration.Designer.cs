@@ -12,8 +12,8 @@ using ProcessingQueue.Infrastructure;
 namespace ProcessingQueue.Migrations
 {
     [DbContext(typeof(ProcessingQueueItemDbContext))]
-    [Migration("20220805090515_InitialMigration")]
-    partial class InitialMigration
+    [Migration("20220805125748_InitalMigration")]
+    partial class InitalMigration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -24,7 +24,7 @@ namespace ProcessingQueue.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder, 1L, 1);
 
-            modelBuilder.Entity("ProcessingQueue.Domain.Aggregates.ProcessingQueueItemAggregate.ProcessingQueueItem", b =>
+            modelBuilder.Entity("ProcessingQueue.Domain.ProcessingQueueItems.ProcessingQueueItem", b =>
                 {
                     b.Property<int>("ProcessingQueueItemKey")
                         .ValueGeneratedOnAdd()
@@ -59,6 +59,9 @@ namespace ProcessingQueue.Migrations
 
                     b.Property<DateTime>("InsertedTimestamp")
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("Message")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("ProcessAttempts")
                         .HasColumnType("int");
