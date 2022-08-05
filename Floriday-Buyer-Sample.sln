@@ -3,7 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.2.32630.192
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Floriday-Buyer-Sample", "Floriday-Buyer-Sample\Floriday-Buyer-Sample.csproj", "{D6B31D3D-F21C-4603-B659-365F4DB69ECC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Floriday-Buyer-Sample", "Floriday-Buyer-Sample\Floriday-Buyer-Sample.csproj", "{D6B31D3D-F21C-4603-B659-365F4DB69ECC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Floriday-Buyer.WokerService", "Floriday-Buyer.WokerService\Floriday-Buyer.WokerService.csproj", "{BD52CB15-BBCB-46D4-8351-642BCC99597A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Floriday-Buyer.Preprocessor.WorkerService", "Floriday-Buyer.Preprocessor.WorkerService\Floriday-Buyer.Preprocessor.WorkerService.csproj", "{B261B8BA-EF63-4942-B347-9957AA518A9E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProcessingQueue", "ProcessingQueue\ProcessingQueue.csproj", "{6655AA8C-969C-4B76-BB37-FAEDCAB9294A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +21,18 @@ Global
 		{D6B31D3D-F21C-4603-B659-365F4DB69ECC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D6B31D3D-F21C-4603-B659-365F4DB69ECC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D6B31D3D-F21C-4603-B659-365F4DB69ECC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BD52CB15-BBCB-46D4-8351-642BCC99597A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BD52CB15-BBCB-46D4-8351-642BCC99597A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BD52CB15-BBCB-46D4-8351-642BCC99597A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BD52CB15-BBCB-46D4-8351-642BCC99597A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B261B8BA-EF63-4942-B347-9957AA518A9E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B261B8BA-EF63-4942-B347-9957AA518A9E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B261B8BA-EF63-4942-B347-9957AA518A9E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B261B8BA-EF63-4942-B347-9957AA518A9E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6655AA8C-969C-4B76-BB37-FAEDCAB9294A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6655AA8C-969C-4B76-BB37-FAEDCAB9294A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6655AA8C-969C-4B76-BB37-FAEDCAB9294A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6655AA8C-969C-4B76-BB37-FAEDCAB9294A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

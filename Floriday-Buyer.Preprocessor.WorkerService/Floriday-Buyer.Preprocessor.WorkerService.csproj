@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Worker">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>dotnet-Floriday_Buyer.Preprocessor.WorkerService-4EF7C26B-8EDC-443D-8D3A-6BC35377C53A</UserSecretsId>
+    <RootNamespace>Floriday_Buyer.Preprocessor.WorkerService</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+	<PackageReference Include="Axerrio.BB.DDD" Version="2.1.2" />
+	<PackageReference Include="Axerrio.BB.DDD.Job" Version="2.2.1" />
+
+	<PackageReference Include="Autofac" Version="6.4.0" />
+    <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="6.0.1" />
+	<PackageReference Include="Serilog.AspNetCore" Version="5.0.0" />
+	<PackageReference Include="Serilog.Settings.Configuration" Version="3.3.0" />
+	<PackageReference Include="Serilog.Sinks.Console" Version="4.0.1" />
+	<PackageReference Include="Serilog.Sinks.Debug" Version="2.0.0" />
+  </ItemGroup>
+</Project>
