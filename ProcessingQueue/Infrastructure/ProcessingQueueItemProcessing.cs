@@ -69,10 +69,10 @@ namespace ProcessingQueue.Infrastructure
 
                 return Task.CompletedTask;
             }
-            return _executionStrategy.ExecuteAsync(MarkEventSkipped(processingQueueItem, ProcessingQueueItemState.Skipped), cancellationToken);
+            return _executionStrategy.ExecuteAsync(MarkEventSkipped(processingQueueItem), cancellationToken);
         }
 
-        private Func<CancellationToken, Task> MarkEventSkipped(ProcessingQueueItem processingQueueItem, ProcessingQueueItemState state)
+        private Func<CancellationToken, Task> MarkEventSkipped(ProcessingQueueItem processingQueueItem)
         {
             return async (cancellationToken) =>
             {
@@ -119,10 +119,9 @@ namespace ProcessingQueue.Infrastructure
                     (
                         select top {_processingQueueItemDatabaseOptions.MaxItemsToPreprocess} q.*
                         from {_processingQueueItemDatabaseOptions.Schema}.{_processingQueueItemDatabaseOptions.TableName} as q with (rowlock, readpast)
-                        where q.[State] = 0
+                        where q.[State] = {(int)ProcessingQueueItemState.Inserted}
                     )
-                    update eqi set eqi.[State] = 1
-                            , eqi.ProcessAttempts = eqi.ProcessAttempts + 1
+                    update eqi set eqi.[State] = {(int)ProcessingQueueItemState.Preprocessing}
                     output inserted.*";
             }
         }
@@ -141,7 +140,7 @@ namespace ProcessingQueue.Infrastructure
             get
             {
                 return $@"update {_processingQueueItemDatabaseOptions.Schema}.{_processingQueueItemDatabaseOptions.TableName} set [State] = {(int)ProcessingQueueItemState.Skipped}
-                        ,[SkippedTimestamp] = @SkippedTimestamp where [ProcessingQueueItemKey] = @ProcessingQueueItemKey";
+                        ,[SkippedTimestamp] = @SkippedTimestamp, [Message] = 'Could not set this queue item as ready to Process' where [ProcessingQueueItemKey] = @ProcessingQueueItemKey";
             }
         }
 

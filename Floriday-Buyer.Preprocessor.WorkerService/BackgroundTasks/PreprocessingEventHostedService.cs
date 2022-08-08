@@ -64,6 +64,7 @@ namespace Floriday_Buyer.Preprocessor.WorkerService.BackgroundTasks
         {
             switch (jobName)
             {
+                case nameof(WorkServiceEventTimedJob): AddJob<WorkServiceEventTimedJob>(jobSetting); break;
                 case nameof(JobHistoryCleanupTimedJob): AddJob<JobHistoryCleanupTimedJob>(jobSetting); break;
                 default: _logger.LogError($"{nameof(PreprocessingEventHostedService)} - Coulnd't find implementation of a job for this settings: {jobName} with ID: {jobSetting.JobSettingID}"); break;
             }

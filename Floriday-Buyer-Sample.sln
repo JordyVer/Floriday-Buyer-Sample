@@ -11,6 +11,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Floriday-Buyer.Preprocessor
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ProcessingQueue", "ProcessingQueue\ProcessingQueue.csproj", "{6655AA8C-969C-4B76-BB37-FAEDCAB9294A}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Floriday-Buyer-Sample.Shared", "Floriday-Buyer-Sample.Shared\Floriday-Buyer-Sample.Shared.csproj", "{155A2A6F-6B7A-4610-90C1-C6FEF35B9FBF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{6655AA8C-969C-4B76-BB37-FAEDCAB9294A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6655AA8C-969C-4B76-BB37-FAEDCAB9294A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6655AA8C-969C-4B76-BB37-FAEDCAB9294A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{155A2A6F-6B7A-4610-90C1-C6FEF35B9FBF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{155A2A6F-6B7A-4610-90C1-C6FEF35B9FBF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{155A2A6F-6B7A-4610-90C1-C6FEF35B9FBF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{155A2A6F-6B7A-4610-90C1-C6FEF35B9FBF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

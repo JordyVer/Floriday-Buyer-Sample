@@ -1,5 +1,5 @@
 using Axerrio.BB.AspNetCore.Infrastructure.ModelBinders.Request;
-using Floriday_Buyer_Sample.Application.Commands;
+using Floriday_Buyer_Sample.Shared.Application.Commands;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ProcessingQueue.Infrastructure.Abstractions;

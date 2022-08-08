@@ -30,6 +30,13 @@ var configuration = new ConfigurationBuilder()
     .AddJsonFile($"Settings/appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production"}.json", optional: true)
     .Build();
 
+Log.Logger = new LoggerConfiguration()
+    .ReadFrom.Configuration(configuration)
+    .Enrich.FromLogContext()
+    .WriteTo.Console()
+    .WriteTo.Debug()
+    .CreateLogger();
+
 var builder = WebApplication.CreateBuilder(args);
 builder.Host.UseSerilog();
 

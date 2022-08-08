@@ -1,5 +1,6 @@
 ﻿using Axerrio.BB.AspNetCore.EntityFrameworkCore.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
 
 namespace Floriday_Buyer_Sample.Infrastructure.Extensions

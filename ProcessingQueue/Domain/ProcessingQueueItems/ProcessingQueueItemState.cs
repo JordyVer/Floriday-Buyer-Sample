@@ -4,11 +4,11 @@
     {
         Inserted,
         Preprocessing,
+        Skipped,
         ReadyToProcess,
         Processing,
-        Failed,
-        Skipped,
         Notified,
+        Failed,
         Processed
     }
 }
