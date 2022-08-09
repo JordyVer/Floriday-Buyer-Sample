@@ -6,7 +6,7 @@ namespace ProcessingQueue.Infrastructure.Abstractions
     {
         Task<IEnumerable<ProcessingQueueItem>> GetEventsToProcessAsync(CancellationToken cancellationToken = default);
 
-        Task MarkEventFailedAsync(ProcessingQueueItem processingQueueItem, CancellationToken cancellationToken = default);
+        Task MarkEventFailedAsync(ProcessingQueueItem processingQueueItem, string message, CancellationToken cancellationToken = default);
 
         Task MarkEventProcessedAsync(ProcessingQueueItem processingQueueItem, CancellationToken cancellationToken = default);
     }

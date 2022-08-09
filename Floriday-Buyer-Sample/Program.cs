@@ -16,13 +16,11 @@ using Axerrio.BB.DDD.Sql.Infrastructure.Abstractions;
 using Dapper;
 using Floriday_Buyer_Sample.Infrastructure.AutofacModules;
 using Floriday_Buyer_Sample.Infrastructure.Extensions;
-using MediatR;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Polly;
 using ProcessingQueue.Infrastructure;
 using ProcessingQueue.Infrastructure.Options;
 using Serilog;
-using System.Reflection;
 
 var configuration = new ConfigurationBuilder()
     .SetBasePath(Directory.GetCurrentDirectory())
@@ -54,8 +52,6 @@ builder.Services.Configure<SingleDbConnectionOptions>(options => { options.Conne
 #endregion configurations
 
 builder.Services.AddControllers();
-builder.Services.AddMediatR(Assembly.GetExecutingAssembly());
-
 builder.Services.AddTrustedMultitenancyHttpServices<TrustedTenant, TrustedTenantUser>(builder.Configuration);
 builder.Services.TryAddSingleton<IIdentityConverter<int>>(IdentityConverter.DefaultConverters.ToIntConverter);
 

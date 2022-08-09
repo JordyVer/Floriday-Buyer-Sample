@@ -37,6 +37,10 @@ namespace ProcessingQueue.Migrations
                     b.Property<DateTime>("EventCreationTimestamp")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("EventEntityName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<Guid>("EventId")
                         .HasColumnType("uniqueidentifier");
 

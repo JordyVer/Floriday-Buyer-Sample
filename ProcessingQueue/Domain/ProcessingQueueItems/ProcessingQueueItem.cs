@@ -19,6 +19,7 @@ namespace ProcessingQueue.Domain.ProcessingQueueItems
         public string Message { get; set; }
 
         public Guid EventId { get; private set; }
+        public string EventEntityName { get; private set; }
         public string EventInstanceKey { get; private set; }
         public string EventName { get; private set; }
         public string EventTypeName { get; private set; }
@@ -35,12 +36,13 @@ namespace ProcessingQueue.Domain.ProcessingQueueItems
             State = ProcessingQueueItemState.Inserted;
         }
 
-        protected ProcessingQueueItem(int tenantId, int tenantUserId, Guid eventId, string eventInstanceKey, string eventName, string eventTypeName, string eventContent)
-            : this()
+        protected ProcessingQueueItem(int tenantId, int tenantUserId, Guid eventId, string eventEntityName, string eventInstanceKey,
+            string eventName, string eventTypeName, string eventContent) : this()
         {
             TenantId = tenantId.ToString();
             TenantUserId = tenantUserId.ToString();
             EventId = eventId;
+            EventEntityName = eventEntityName;
             EventInstanceKey = eventInstanceKey;
             EventName = eventName;
             EventTypeName = eventTypeName;
@@ -48,14 +50,15 @@ namespace ProcessingQueue.Domain.ProcessingQueueItems
             EventContent = eventContent;
         }
 
-        public static ProcessingQueueItem Create<TQueueItem>(string instanceKey, int tenantId, int tenantUserId, TQueueItem queueItem, Guid eventId)
+        public static ProcessingQueueItem Create<TQueueItem>(string eventEntityName, string eventInstanceKey, int tenantId,
+            int tenantUserId, TQueueItem queueItem, Guid eventId)
         {
             if (eventId == default) eventId = Guid.NewGuid();
             var eventName = typeof(TQueueItem).Name;
             var eventTypeName = typeof(TQueueItem).FullName;
             var eventContent = JsonSerializer.Serialize(queueItem);
 
-            return new(tenantId, tenantUserId, eventId, instanceKey, eventName, eventTypeName, eventContent);
+            return new(tenantId, tenantUserId, eventId, eventEntityName, eventInstanceKey, eventName, eventTypeName, eventContent);
         }
     }
 }

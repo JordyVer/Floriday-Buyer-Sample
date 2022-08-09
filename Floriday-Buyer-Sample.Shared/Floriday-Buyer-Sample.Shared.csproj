@@ -9,10 +9,12 @@
 
 	<ItemGroup>
 		<PackageReference Include="Axerrio.BB.AspNetCore" Version="2.2.2" />
-		<PackageReference Include="Axerrio.BB.DDD" Version="2.2.0" />
 		<PackageReference Include="Axerrio.BB.AspNetCore.EntityFrameworkCore" Version="2.1.2" />
 		<PackageReference Include="Microsoft.Extensions.Hosting" Version="6.0.1" />
-		<PackageReference Include="Axerrio.BB.DDD.EntityFrameworkCore" Version="2.1.2" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.0.7" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\ProcessingQueue\ProcessingQueue.csproj" />
 	</ItemGroup>
 </Project>

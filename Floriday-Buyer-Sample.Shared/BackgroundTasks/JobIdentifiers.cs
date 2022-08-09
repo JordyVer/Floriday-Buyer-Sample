@@ -4,6 +4,7 @@
     {
         WorkService = 1,
         JobHistoryCleanup = 2,
-        //ConsumerWorkerService = 3
+        CleanupEvents = 3,
+        NotifyFailed = 4
     }
 }

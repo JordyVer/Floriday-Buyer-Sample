@@ -1,5 +1,6 @@
 ﻿using Axerrio.BB.DDD.Domain.Multitenancy.Abstractions;
 using Axerrio.BB.DDD.Infrastructure.ExecutionStrategy.Abstractions;
+using Axerrio.BB.DDD.Infrastructure.IntegrationEvents.Options;
 using Axerrio.BB.DDD.Infrastructure.Sharding.Options;
 using Axerrio.BB.DDD.Sql.Infrastructure.Abstractions;
 using Dapper;
@@ -9,6 +10,7 @@ using Microsoft.Extensions.Options;
 using ProcessingQueue.Domain.ProcessingQueueItems;
 using ProcessingQueue.Infrastructure.Abstractions;
 using ProcessingQueue.Infrastructure.Options;
+using System.Data.SqlClient;
 
 namespace ProcessingQueue.Infrastructure
 {
@@ -19,6 +21,7 @@ namespace ProcessingQueue.Infrastructure
         private readonly IDbExecutionStrategy<ProcessingQueueItemProcessing<TTenant, TTenantUser>> _executionStrategy;
         private readonly ProcessingQueueItemDatabaseOptions _processingQueueItemDatabaseOptions;
         private readonly ShardingOptions _shardingOptions;
+        private readonly SingleDbConnectionOptions _singleDbConnectionOptions;
         private readonly ITenantContextAccessor<TTenant, TTenantUser> _tenantContextAccessor;
         private readonly IDdrDbConnectionFactory<int> _ddrDbConnectionFactory;
         private readonly ILogger<ProcessingQueueItemProcessing<TTenant, TTenantUser>> _logger;
@@ -26,6 +29,7 @@ namespace ProcessingQueue.Infrastructure
         public ProcessingQueueItemProcessing(IDbExecutionStrategy<ProcessingQueueItemProcessing<TTenant, TTenantUser>> executionStrategy,
             IOptions<ProcessingQueueItemDatabaseOptions> processingQueueItemDatabaseOptions,
             IOptions<ShardingOptions> shardingOptions,
+            IOptions<SingleDbConnectionOptions> singleDbConnectionOptions,
             ITenantContextAccessor<TTenant, TTenantUser> tenantContextAccessor,
             IDdrDbConnectionFactory<int> ddrDbConnectionFactory,
             ILogger<ProcessingQueueItemProcessing<TTenant, TTenantUser>> logger)
@@ -33,6 +37,7 @@ namespace ProcessingQueue.Infrastructure
             _executionStrategy = EnsureArg.IsNotNull(executionStrategy, nameof(executionStrategy));
             _processingQueueItemDatabaseOptions = EnsureArg.IsNotNull(processingQueueItemDatabaseOptions, nameof(processingQueueItemDatabaseOptions)).Value;
             _shardingOptions = EnsureArg.IsNotNull(shardingOptions, nameof(shardingOptions)).Value;
+            _singleDbConnectionOptions = EnsureArg.IsNotNull(singleDbConnectionOptions, nameof(singleDbConnectionOptions)).Value;
             _tenantContextAccessor = EnsureArg.IsNotNull(tenantContextAccessor, nameof(tenantContextAccessor));
             _ddrDbConnectionFactory = EnsureArg.IsNotNull(ddrDbConnectionFactory, nameof(ddrDbConnectionFactory));
             _logger = EnsureArg.IsNotNull(logger, nameof(logger));
@@ -55,13 +60,14 @@ namespace ProcessingQueue.Infrastructure
             return async (cancellationToken) =>
             {
                 _logger.LogDebug($"Retrieving processing queueItems for pre-processing");
-                using var connection = _ddrDbConnectionFactory.Create(_tenantContextAccessor.TenantContext.Tenant.TenantId, _shardingOptions.ShardMapName, _shardingOptions.ConnectionString);
+                using var connection = new SqlConnection(_singleDbConnectionOptions.ConnectionString);
+                connection.Open();
                 var queueItems = await connection.QueryAsync<ProcessingQueueItem>(PickupPreprocessSql);
                 return queueItems;
             };
         }
 
-        public Task MarkEventSkippedAsync(ProcessingQueueItem processingQueueItem, CancellationToken cancellationToken = default)
+        public Task MarkEventSkippedAsync(ProcessingQueueItem processingQueueItem, string message, CancellationToken cancellationToken = default)
         {
             if (cancellationToken.IsCancellationRequested)
             {
@@ -69,19 +75,19 @@ namespace ProcessingQueue.Infrastructure
 
                 return Task.CompletedTask;
             }
-            return _executionStrategy.ExecuteAsync(MarkEventSkipped(processingQueueItem), cancellationToken);
+            return _executionStrategy.ExecuteAsync(MarkEventSkipped(processingQueueItem, message), cancellationToken);
         }
 
-        private Func<CancellationToken, Task> MarkEventSkipped(ProcessingQueueItem processingQueueItem)
+        private Func<CancellationToken, Task> MarkEventSkipped(ProcessingQueueItem processingQueueItem, string message)
         {
             return async (cancellationToken) =>
             {
                 _logger.LogDebug($"ProcessingQueueItem {processingQueueItem.ProcessingQueueItemKey}, is skipped");
 
                 using var connection = _ddrDbConnectionFactory.Create(_tenantContextAccessor.TenantContext.Tenant.TenantId, _shardingOptions.ShardMapName, _shardingOptions.ConnectionString);
-                var param = new { processingQueueItem.ProcessingQueueItemKey, SkippedTimestamp = DateTime.UtcNow };
+                var param = new { processingQueueItem.ProcessingQueueItemKey, SkippedTimestamp = DateTime.UtcNow, message };
 
-                await connection.ExecuteAsync(MarkQueueItemSkipped, param);
+                await connection.ExecuteAsync(MarkEventSkippedSql, param);
             };
         }
 
@@ -105,7 +111,7 @@ namespace ProcessingQueue.Infrastructure
                 using var connection = _ddrDbConnectionFactory.Create(_tenantContextAccessor.TenantContext.Tenant.TenantId, _shardingOptions.ShardMapName, _shardingOptions.ConnectionString);
                 var param = new { processingQueueItem.ProcessingQueueItemKey, ReadyForProcessingTimestamp = DateTime.UtcNow };
 
-                await connection.ExecuteAsync(MarkQueueItemReadyToProcess, param);
+                await connection.ExecuteAsync(MarkEventReadyToProcessSql, param);
             };
         }
 
@@ -126,21 +132,22 @@ namespace ProcessingQueue.Infrastructure
             }
         }
 
-        private string MarkQueueItemReadyToProcess
+        private string MarkEventReadyToProcessSql
         {
             get
             {
-                return $@"update {_processingQueueItemDatabaseOptions.Schema}.{_processingQueueItemDatabaseOptions.TableName} set [State] = {(int)ProcessingQueueItemState.ReadyToProcess}
-                        ,[ReadyForProcessingTimestamp] = @ReadyForProcessingTimestamp where [ProcessingQueueItemKey] = @ProcessingQueueItemKey";
+                return $@"update {_processingQueueItemDatabaseOptions.Schema}.{_processingQueueItemDatabaseOptions.TableName}
+                        set [State] = {(int)ProcessingQueueItemState.ReadyToProcess},[ReadyForProcessingTimestamp] = @ReadyForProcessingTimestamp
+                        where [ProcessingQueueItemKey] = @ProcessingQueueItemKey";
             }
         }
 
-        private string MarkQueueItemSkipped
+        private string MarkEventSkippedSql
         {
             get
             {
                 return $@"update {_processingQueueItemDatabaseOptions.Schema}.{_processingQueueItemDatabaseOptions.TableName} set [State] = {(int)ProcessingQueueItemState.Skipped}
-                        ,[SkippedTimestamp] = @SkippedTimestamp, [Message] = 'Could not set this queue item as ready to Process' where [ProcessingQueueItemKey] = @ProcessingQueueItemKey";
+                        ,[SkippedTimestamp] = @SkippedTimestamp, [Message] = @message where [ProcessingQueueItemKey] = @ProcessingQueueItemKey";
             }
         }
 

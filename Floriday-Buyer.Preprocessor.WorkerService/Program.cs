@@ -1,6 +1,5 @@
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
-using Axerrio.BB.AspNetCore.HealthChecks.Extensions;
 using Axerrio.BB.AspNetCore.Helpers.Serialize;
 using Axerrio.BB.DDD.Domain.Multitenancy;
 using Axerrio.BB.DDD.Domain.Multitenancy.Extensions;
@@ -8,7 +7,6 @@ using Axerrio.BB.DDD.Infrastructure.IntegrationEvents.Options;
 using Axerrio.BB.DDD.Infrastructure.Multitenancy.Services;
 using Axerrio.BB.DDD.Infrastructure.Multitenancy.Services.Options;
 using Axerrio.BB.DDD.Job.Infrastructure;
-using Axerrio.BB.DDD.Job.Infrastructure.HealthChecks.Extensions;
 using Axerrio.BB.DDD.Sql.Extensions;
 using Axerrio.BB.DDD.Sql.Infrastructure.Abstractions;
 using Dapper;
@@ -38,7 +36,6 @@ IHost host = Host.CreateDefaultBuilder(args)
     {
         services.Configure<SingleDbConnectionOptions>(options => { options.ConnectionString = hostContext.Configuration["ConnectionString"]; });
         services.AddSimpleDbContext<JobDbContext>(hostContext.Configuration["ConnectionString"]);
-        services.AddServiceHealthChecks().AddQuartzHealthCheck();
         services.AddTransient<IDbQueryService<SqlMapper.GridReader>, DapperDbQueryService>();
         services.AddTransient<IDbQueryService, DapperDbQueryService>();
         services.AddTransient<IDdrDbConnectionFactory<int>, SingleDbConnectionFactory<int>>();

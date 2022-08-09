@@ -12,8 +12,8 @@ using ProcessingQueue.Infrastructure;
 namespace ProcessingQueue.Migrations
 {
     [DbContext(typeof(ProcessingQueueItemDbContext))]
-    [Migration("20220805125748_InitalMigration")]
-    partial class InitalMigration
+    [Migration("20220809103155_InitialMigrate")]
+    partial class InitialMigrate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -38,6 +38,10 @@ namespace ProcessingQueue.Migrations
 
                     b.Property<DateTime>("EventCreationTimestamp")
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("EventEntityName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid>("EventId")
                         .HasColumnType("uniqueidentifier");

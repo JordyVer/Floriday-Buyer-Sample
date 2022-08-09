@@ -1,5 +1,6 @@
 ﻿using Axerrio.BB.DDD.Domain.Multitenancy.Abstractions;
 using Axerrio.BB.DDD.Infrastructure.ExecutionStrategy.Abstractions;
+using Axerrio.BB.DDD.Infrastructure.IntegrationEvents.Options;
 using Axerrio.BB.DDD.Infrastructure.Sharding.Options;
 using Axerrio.BB.DDD.Sql.Infrastructure.Abstractions;
 using Dapper;
@@ -9,6 +10,7 @@ using Microsoft.Extensions.Options;
 using ProcessingQueue.Domain.ProcessingQueueItems;
 using ProcessingQueue.Infrastructure.Abstractions;
 using ProcessingQueue.Infrastructure.Options;
+using System.Data.SqlClient;
 
 namespace ProcessingQueue.Infrastructure
 {
@@ -19,20 +21,24 @@ namespace ProcessingQueue.Infrastructure
         private readonly IDbExecutionStrategy<ProcessingQueueItemConsumer<TTenant, TTenantUser>> _executionStrategy;
         private readonly ProcessingQueueItemDatabaseOptions _processingQueueItemDatabaseOptions;
         private readonly ShardingOptions _shardingOptions;
-        private readonly ITenantContextAccessor<TTenant, TTenantUser> _tenantContextAccessor;
+        private readonly SingleDbConnectionOptions _singleDbConnectionOptions;
+
+        private readonly ITenantContextAccessor<TTenant> _tenantContextAccessor;
         private readonly IDdrDbConnectionFactory<int> _ddrDbConnectionFactory;
         private readonly ILogger<ProcessingQueueItemConsumer<TTenant, TTenantUser>> _logger;
 
         public ProcessingQueueItemConsumer(IDbExecutionStrategy<ProcessingQueueItemConsumer<TTenant, TTenantUser>> executionStrategy,
             IOptions<ProcessingQueueItemDatabaseOptions> processingQueueItemDatabaseOptions,
             IOptions<ShardingOptions> shardingOptions,
-            ITenantContextAccessor<TTenant, TTenantUser> tenantContextAccessor,
+            IOptions<SingleDbConnectionOptions> singleDbConnectionOptions,
+            ITenantContextAccessor<TTenant> tenantContextAccessor,
             IDdrDbConnectionFactory<int> ddrDbConnectionFactory,
             ILogger<ProcessingQueueItemConsumer<TTenant, TTenantUser>> logger)
         {
             _executionStrategy = EnsureArg.IsNotNull(executionStrategy, nameof(executionStrategy));
             _processingQueueItemDatabaseOptions = EnsureArg.IsNotNull(processingQueueItemDatabaseOptions, nameof(processingQueueItemDatabaseOptions)).Value;
             _shardingOptions = EnsureArg.IsNotNull(shardingOptions, nameof(shardingOptions)).Value;
+            _singleDbConnectionOptions = EnsureArg.IsNotNull(singleDbConnectionOptions, nameof(singleDbConnectionOptions)).Value;
             _tenantContextAccessor = EnsureArg.IsNotNull(tenantContextAccessor, nameof(tenantContextAccessor));
             _ddrDbConnectionFactory = EnsureArg.IsNotNull(ddrDbConnectionFactory, nameof(ddrDbConnectionFactory));
             _logger = EnsureArg.IsNotNull(logger, nameof(logger));
@@ -55,9 +61,9 @@ namespace ProcessingQueue.Infrastructure
             return async (cancellationToken) =>
             {
                 _logger.LogDebug($"Retrieving processing queueItems to process");
-                using var connection = _ddrDbConnectionFactory.Create(_tenantContextAccessor.TenantContext.Tenant.TenantId, _shardingOptions.ShardMapName, _shardingOptions.ConnectionString);
-                var queueItems = await connection.QueryAsync<ProcessingQueueItem>(EventsToProcessSql);
-                return queueItems;
+                using var connection = new SqlConnection(_singleDbConnectionOptions.ConnectionString);
+                connection.Open();
+                return await connection.QueryAsync<ProcessingQueueItem>(EventsToProcessSql);
             };
         }
 
@@ -85,8 +91,7 @@ namespace ProcessingQueue.Infrastructure
             };
         }
 
-        // TODO problemdetails op message
-        public Task MarkEventFailedAsync(ProcessingQueueItem processingQueueItem, CancellationToken cancellationToken = default)
+        public Task MarkEventFailedAsync(ProcessingQueueItem processingQueueItem, string message, CancellationToken cancellationToken = default)
         {
             if (cancellationToken.IsCancellationRequested)
             {
@@ -94,17 +99,17 @@ namespace ProcessingQueue.Infrastructure
 
                 return Task.CompletedTask;
             }
-            return _executionStrategy.ExecuteAsync(MarkEventFailed(processingQueueItem), cancellationToken);
+            return _executionStrategy.ExecuteAsync(MarkEventFailed(processingQueueItem, message), cancellationToken);
         }
 
-        private Func<CancellationToken, Task> MarkEventFailed(ProcessingQueueItem processingQueueItem)
+        private Func<CancellationToken, Task> MarkEventFailed(ProcessingQueueItem processingQueueItem, string message)
         {
             return async (cancellationToken) =>
             {
                 _logger.LogDebug($"ProcessingQueueItem {processingQueueItem.ProcessingQueueItemKey}, Failed while processing");
 
                 using var connection = _ddrDbConnectionFactory.Create(_tenantContextAccessor.TenantContext.Tenant.TenantId, _shardingOptions.ShardMapName, _shardingOptions.ConnectionString);
-                var param = new { processingQueueItem.ProcessingQueueItemKey, FailedTimestamp = DateTime.UtcNow };
+                var param = new { processingQueueItem.ProcessingQueueItemKey, FailedTimestamp = DateTime.UtcNow, message };
 
                 await connection.ExecuteAsync(MarkEventFailedSql, param);
             };
@@ -122,6 +127,7 @@ namespace ProcessingQueue.Infrastructure
                         from {_processingQueueItemDatabaseOptions.Schema}.{_processingQueueItemDatabaseOptions.TableName} as q with (rowlock, readpast)
                         where q.[State] in ({(int)ProcessingQueueItemState.ReadyToProcess},{(int)ProcessingQueueItemState.Processing},{(int)ProcessingQueueItemState.Failed})
                         and q.[ProcessAttempts] < {_processingQueueItemDatabaseOptions.RetryAttempts}
+                        and {_tenantContextAccessor.TenantContext.Tenant.TenantId} = q.[TenantId]
 
                     )
                     update eqi set eqi.[State] = {(int)ProcessingQueueItemState.Processing}
@@ -135,7 +141,7 @@ namespace ProcessingQueue.Infrastructure
             get
             {
                 return $@"update {_processingQueueItemDatabaseOptions.Schema}.{_processingQueueItemDatabaseOptions.TableName} set [State] = {(int)ProcessingQueueItemState.Failed}
-                        ,[FailedTimestamp] = @FailedTimestamp where [ProcessingQueueItemKey] = @ProcessingQueueItemKey";
+                        ,[FailedTimestamp] = @FailedTimestamp, [Message] = @message where [ProcessingQueueItemKey] = @ProcessingQueueItemKey";
             }
         }
 

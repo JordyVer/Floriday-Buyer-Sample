@@ -2,6 +2,6 @@
 {
     public interface IProcessingQueueItemPublisher
     {
-        Task PublishAsync<TQueueItem>(string instanceKey, TQueueItem queueItem, Guid queueItemId, CancellationToken cancellationToken = default);
+        Task PublishAsync<TQueueItem>(string entityName, string instanceKey, TQueueItem queueItem, Guid queueItemId, CancellationToken cancellationToken = default);
     }
 }

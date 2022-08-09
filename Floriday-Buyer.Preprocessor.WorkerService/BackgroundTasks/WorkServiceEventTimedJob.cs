@@ -37,17 +37,17 @@ namespace Floriday_Buyer.Preprocessor.WorkerService.BackgroundTasks
                 {
                     try
                     {
-                        SetupTenantAnsSystemUserContext(int.Parse(item.TenantId), int.Parse(item.TenantId));
-                        // TODO implment real pre processing here!!!
-                        bool success = (new Random().Next(10) > 5);
+                        SetupTenantAnsSystemUserContext(int.Parse(item.TenantId), int.Parse(item.TenantUserId));
 
+                        bool success = new Random().Next(10) > 5;
                         if (success)
                             await processingService.MarkEventReadyToProcessAsync(item, cancellationToken);
                         else
-                            await processingService.MarkEventSkippedAsync(item, cancellationToken);
+                            await processingService.MarkEventSkippedAsync(item, "This event was skipped, reason: blabla", cancellationToken);
                     }
                     catch (Exception exc)
                     {
+                        _logger.LogError(exc, $"An error occurred when pre-processing event: {item.ProcessingQueueItemKey}");
                     }
                     finally
                     {

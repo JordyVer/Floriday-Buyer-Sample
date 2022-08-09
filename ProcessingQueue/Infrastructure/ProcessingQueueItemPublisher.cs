@@ -22,13 +22,12 @@ namespace ProcessingQueue.Infrastructure
             _tenantContextAccessor = EnsureArg.IsNotNull(tenantContextAccessor, nameof(tenantContextAccessor));
         }
 
-        //
-        public Task PublishAsync<TQueueItem>(string instanceKey, TQueueItem queueItem, Guid queueItemId, CancellationToken cancellationToken = default)
+        public Task PublishAsync<TQueueItem>(string entityName, string instanceKey, TQueueItem queueItem, Guid queueItemId, CancellationToken cancellationToken = default)
         {
             var tenantId = _tenantContextAccessor.TenantContext.Tenant.TenantId;
             var tenantUserId = _tenantContextAccessor.TenantContext.TenantUser.UserId;
 
-            var processingQueueItem = ProcessingQueueItem.Create(instanceKey, tenantId, tenantUserId, queueItem, queueItemId);
+            var processingQueueItem = ProcessingQueueItem.Create(entityName, instanceKey, tenantId, tenantUserId, queueItem, queueItemId);
 
             return PublishAsync(processingQueueItem, cancellationToken);
         }

@@ -1,5 +1,5 @@
-﻿using Axerrio.BB.AspNetCore.Quartz.Infrastructure.HealthChecks;
-using Axerrio.BB.AspNetCore.Quartz.Infrastructure.Hosting.HostedServices;
+﻿using Axerrio.BB.AspNetCore.Quartz.Infrastructure.Hosting.HostedServices;
+using Axerrio.BB.AspNetCore.Quartz.Infrastructure.SchedulerListener;
 using Axerrio.BB.AspNetCore.Quartz.Model;
 using Axerrio.BB.DDD.Job.BackgroundTasks.TimedJobs;
 using Axerrio.BB.DDD.Job.Domain.Aggregates.JobSettingAggregate.Abstractions;
@@ -29,7 +29,7 @@ namespace Floriday_Buyer.Preprocessor.WorkerService.BackgroundTasks
             }
         }
 
-        public PreprocessingEventHostedService(ILogger<HostedService> logger, IJobFactory jobFactory, IJobSettingRepository jobSettingRepository, QuartzHealthCheck quartzHealthCheck) : base(logger, jobFactory, quartzHealthCheck)
+        public PreprocessingEventHostedService(ILogger<HostedService> logger, IJobFactory jobFactory, IJobSettingRepository jobSettingRepository, QuartzSchedulerListener listener) : base(logger, jobFactory, listener)
         {
             _logger = EnsureArg.IsNotNull(logger, nameof(logger));
 

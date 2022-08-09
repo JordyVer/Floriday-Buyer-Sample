@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace ProcessingQueue.Migrations
 {
-    public partial class InitalMigration : Migration
+    public partial class InitialMigrate : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -30,6 +30,7 @@ namespace ProcessingQueue.Migrations
                     ReadyForProcessingTimestamp = table.Column<DateTime>(type: "datetime2", nullable: true),
                     Message = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     EventId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    EventEntityName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     EventInstanceKey = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     EventName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     EventTypeName = table.Column<string>(type: "nvarchar(max)", nullable: false),
