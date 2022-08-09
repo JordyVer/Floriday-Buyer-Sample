@@ -1,6 +1,6 @@
 ﻿{
   "profiles": {
-    "Floriday_Buyer.WokerService": {
+    "Floriday_Buyer.WorkerService": {
       "commandName": "Project",
       "dotnetRunMessages": true,
       "environmentVariables": {

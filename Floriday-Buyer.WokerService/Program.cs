@@ -35,10 +35,7 @@ IHost host = Host.CreateDefaultBuilder(args)
     .UseServiceProviderFactory(new AutofacServiceProviderFactory())
     .ConfigureServices((hostContext, services) =>
     {
-        var assemblies = AppDomain.CurrentDomain.GetAssemblies();
         services.AddMediatR(typeof(CreateTestCommand).Assembly);
-
-        // services.AddScoped<CommandHandler<CreateTestCommand>, CreateTestCommandHandler>();
 
         services.AddHostedService<Worker>();
         services.Configure<SingleDbConnectionOptions>(options => { options.ConnectionString = hostContext.Configuration["ConnectionString"]; });

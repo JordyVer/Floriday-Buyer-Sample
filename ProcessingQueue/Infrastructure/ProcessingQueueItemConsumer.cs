@@ -79,7 +79,7 @@ namespace ProcessingQueue.Infrastructure
                 _logger.LogDebug($"ProcessingQueueItem {processingQueueItem.ProcessingQueueItemKey}, is Processed");
 
                 using var connection = _ddrDbConnectionFactory.Create(_tenantContextAccessor.TenantContext.Tenant.TenantId, _shardingOptions.ShardMapName, _shardingOptions.ConnectionString);
-                var param = new { processingQueueItem.ProcessingQueueItemKey, SkippedTimestamp = DateTime.UtcNow };
+                var param = new { processingQueueItem.ProcessingQueueItemKey, ProcessedTimestamp = DateTime.UtcNow };
 
                 await connection.ExecuteAsync(MarkEventProcessedSql, param);
             };
@@ -104,7 +104,7 @@ namespace ProcessingQueue.Infrastructure
                 _logger.LogDebug($"ProcessingQueueItem {processingQueueItem.ProcessingQueueItemKey}, Failed while processing");
 
                 using var connection = _ddrDbConnectionFactory.Create(_tenantContextAccessor.TenantContext.Tenant.TenantId, _shardingOptions.ShardMapName, _shardingOptions.ConnectionString);
-                var param = new { processingQueueItem.ProcessingQueueItemKey, ReadyForProcessingTimestamp = DateTime.UtcNow };
+                var param = new { processingQueueItem.ProcessingQueueItemKey, FailedTimestamp = DateTime.UtcNow };
 
                 await connection.ExecuteAsync(MarkEventFailedSql, param);
             };
@@ -135,7 +135,7 @@ namespace ProcessingQueue.Infrastructure
             get
             {
                 return $@"update {_processingQueueItemDatabaseOptions.Schema}.{_processingQueueItemDatabaseOptions.TableName} set [State] = {(int)ProcessingQueueItemState.Failed}
-                        ,[ReadyForProcessingTimestamp] = @ReadyForProcessingTimestamp where [ProcessingQueueItemKey] = @ProcessingQueueItemKey";
+                        ,[FailedTimestamp] = @FailedTimestamp where [ProcessingQueueItemKey] = @ProcessingQueueItemKey";
             }
         }
 
@@ -144,7 +144,7 @@ namespace ProcessingQueue.Infrastructure
             get
             {
                 return $@"update {_processingQueueItemDatabaseOptions.Schema}.{_processingQueueItemDatabaseOptions.TableName} set [State] = {(int)ProcessingQueueItemState.Processed}
-                        ,[SkippedTimestamp] = @SkippedTimestamp where [ProcessingQueueItemKey] = @ProcessingQueueItemKey";
+                        ,[ProcessedTimestamp] = @ProcessedTimestamp where [ProcessingQueueItemKey] = @ProcessingQueueItemKey";
             }
         }
 

@@ -30,23 +30,29 @@ namespace Floriday_Buyer.Preprocessor.WorkerService.BackgroundTasks
         {
             try
             {
-                // dependencies!!
                 var processingService = scope.ServiceProvider.GetRequiredService<IProcessingQueueItemProcessing>();
-
                 var itemsForProcessing = await processingService.GetEventsForPreprocessingAsync(cancellationToken);
-
-                // log number of items
 
                 foreach (var item in itemsForProcessing)
                 {
-                    SetupTenantAnsSystemUserContext(int.Parse(item.TenantId), int.Parse(item.TenantId));
-                    // TODO implment real pre processing here!!!
-                    bool success = (new Random().Next(10) > 5);
+                    try
+                    {
+                        SetupTenantAnsSystemUserContext(int.Parse(item.TenantId), int.Parse(item.TenantId));
+                        // TODO implment real pre processing here!!!
+                        bool success = (new Random().Next(10) > 5);
 
-                    if (success)
-                        await processingService.MarkEventReadyToProcessAsync(item, cancellationToken);
-                    else
-                        await processingService.MarkEventSkippedAsync(item, cancellationToken);
+                        if (success)
+                            await processingService.MarkEventReadyToProcessAsync(item, cancellationToken);
+                        else
+                            await processingService.MarkEventSkippedAsync(item, cancellationToken);
+                    }
+                    catch (Exception exc)
+                    {
+                    }
+                    finally
+                    {
+                        DisposeTenantAndTenantUserContext();
+                    }
                 }
 
                 Job.UpdateStatus(JobStatus.Success, $"Successfully Preprocessed {itemsForProcessing.Count()} processing queuitems");
@@ -54,10 +60,6 @@ namespace Floriday_Buyer.Preprocessor.WorkerService.BackgroundTasks
             catch (Exception exc)
             {
                 Job.UpdateStatus(JobStatus.Failed, $"Failed to Preprocessed queue items {exc.Demystify()}");
-            }
-            finally
-            {
-                DisposeTenantAndTenantUserContext();
             }
         }
 

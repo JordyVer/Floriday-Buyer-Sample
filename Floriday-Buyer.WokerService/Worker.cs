@@ -1,3 +1,4 @@
+using Axerrio.BB.DDD.Application.Commands;
 using Axerrio.BB.DDD.Application.Commands.Abstractions;
 using Axerrio.BB.DDD.Domain.Multitenancy;
 using Axerrio.BB.DDD.Domain.Multitenancy.Abstractions;
@@ -48,14 +49,11 @@ namespace Floriday_Buyer.WorkerService
                     var itemsToProcess = await consumerService.GetEventsToProcessAsync(stoppingToken);
                     foreach (var item in itemsToProcess)
                     {
-                        CommandResult result = new CommandResult.Failed(_logger, Guid.NewGuid());
-
-                        // nadenken
-                        switch (item.EventName)
+                        CommandResult result = item.EventName switch
                         {
-                            case nameof(CreateTestCommand): result = await GetCommandResultAsync<CreateTestCommand>(item); break;
-                        }
-
+                            nameof(CreateTestCommand) => await GetCommandResultAsync<CreateTestCommand>(item),
+                            _ => new CommandResult.Failed(_logger, Guid.NewGuid()),
+                        };
                         if (result.Success)
                             await consumerService.MarkEventProcessedAsync(item, stoppingToken);
                         else
@@ -81,7 +79,7 @@ namespace Floriday_Buyer.WorkerService
 
             if (command == null) return new CommandResult.Failed(_logger, Guid.NewGuid());
 
-            return await _mediator.Send(command);
+            return await _mediator.ExecuteCommandAsync(command);
         }
 
         private void SetupTenantAnsSystemUserContext()
