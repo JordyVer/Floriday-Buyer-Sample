@@ -1,18 +1,24 @@
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using Axerrio.BB.AspNetCore.Helpers.Converters;
+using Axerrio.BB.AspNetCore.Helpers.Serialize;
 using Axerrio.BB.DDD.Domain.Multitenancy;
 using Axerrio.BB.DDD.Domain.Multitenancy.Extensions;
 using Axerrio.BB.DDD.EntityFrameworkCore.Infrastructure;
 using Axerrio.BB.DDD.EntityFrameworkCore.Infrastructure.ExecutionStrategy;
 using Axerrio.BB.DDD.Extensions;
+using Axerrio.BB.DDD.IE.AzureServiceBus.Infrastructure.Multitenancy;
 using Axerrio.BB.DDD.Infrastructure.ExecutionStrategy.Abstractions;
 using Axerrio.BB.DDD.Infrastructure.IntegrationEvents.Options;
 using Axerrio.BB.DDD.Infrastructure.Multitenancy.Cache;
 using Axerrio.BB.DDD.Infrastructure.Multitenancy.Middleware;
+using Axerrio.BB.DDD.Infrastructure.Multitenancy.Services;
+using Axerrio.BB.DDD.Infrastructure.Multitenancy.Services.Options;
 using Axerrio.BB.DDD.Infrastructure.Multitenancy.TenantResolvers;
+using Axerrio.BB.DDD.Infrastructure.Multitenancy.TenantResolvers.Abstractions;
 using Axerrio.BB.DDD.Sql.Extensions;
 using Axerrio.BB.DDD.Sql.Infrastructure.Abstractions;
+using Azure.Messaging.ServiceBus;
 using Dapper;
 using Floriday_Buyer_Sample.Infrastructure.AutofacModules;
 using Floriday_Buyer_Sample.Infrastructure.Extensions;
@@ -52,8 +58,20 @@ builder.Services.Configure<SingleDbConnectionOptions>(options => { options.Conne
 #endregion configurations
 
 builder.Services.AddControllers();
+builder.Services.AddHttpContextAccessor();
+
 builder.Services.AddTrustedMultitenancyHttpServices<TrustedTenant, TrustedTenantUser>(builder.Configuration);
 builder.Services.TryAddSingleton<IIdentityConverter<int>>(IdentityConverter.DefaultConverters.ToIntConverter);
+
+builder.Services.AddMultitenancyCoreServices<TrustedTenant, JsonSerializer, TrustedTenantService, TenantServiceOptions, TrustedTenantUser, TrustedTenantUserService<TrustedTenant>, TenantUserServiceOptions>(builder.Configuration, AxerrioTenantType.ABSTenantType);
+//builder.Services.TryAddTransient<ITenantUserResolver<TrustedTenant, TrustedTenantUser, HttpContext>, HttpContextClaimsPrincipalTenantUserResolver<TrustedTenant, TrustedTenantUser>>();
+//builder.Services.TryAddTransient<ITenantResolver<TrustedTenant, ServiceBusMessage>, HttpContextClaimsPrincipalTenantUserResolver<TrustedTenant, TrustedTenantUser>>();
+//builder.Services.TryAddTransient<ITenantUserResolver<TrustedTenant, TrustedTenantUser, HttpContext>, HttpContextClaimsPrincipalTenantUserResolver<TrustedTenant, TrustedTenantUser>>();
+
+builder.Services.TryAddTransient<ITenantResolver<TrustedTenant, ServiceBusMessage>, AzureServiceBusMessageTenantResolver<TrustedTenant>>();
+builder.Services.TryAddTransient<ITenantUserResolver<TrustedTenant, TrustedTenantUser, ServiceBusMessage>, AzureServiceBusMessageTenantUserResolver<TrustedTenant, TrustedTenantUser>>();
+
+builder.Services.AddMultitenancyHttpServices<TrustedTenant, HttpContextHeaderTenantResolver<TrustedTenant>, HttpContextHeaderTenantResolverOptions, TrustedTenantUser, HttpContextHeaderTenantUserResolver<TrustedTenant, TrustedTenantUser>, HttpContextHeaderTenantUserResolverOptions>(builder.Configuration);
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -96,7 +114,8 @@ app.MigrateDbContext<ProcessingQueueItemDbContext>()
 app.UseSwagger();
 app.UseSwaggerUI();
 
-app.UseMultitenancy<TrustedTenant, TrustedTenantUser>();
+//app.UseMultitenancy<TrustedTenant, TrustedTenantUser>();
+app.UseTrustedTenantUserResolutionMiddleware();
 
 app.UseHttpsRedirection();
 

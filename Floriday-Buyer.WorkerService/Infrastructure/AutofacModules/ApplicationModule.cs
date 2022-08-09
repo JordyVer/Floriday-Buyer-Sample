@@ -11,15 +11,6 @@ namespace Floriday_Buyer.WorkerService.Infrastructure.AutofacModules
         {
             base.Load(builder);
 
-            //builder.RegisterModule<MediatorModule<CreateTestCommand>>();
-
-            //builder.RegisterType<CreateTestCommandValidator>()
-            //   .AsImplementedInterfaces();
-
-            //builder.RegisterModule(new JobModule<ProcessingEventHostedService>());
-
-            //builder.RegisterJob<ConsumerWorkerServiceEventTimedJob>((int)JobIdentifiers.ConsumerWorkerService);
-
             builder.RegisterType<ProcessingQueueItemConsumer<TrustedTenant, TrustedTenantUser>>()
                 .As<IProcessingQueueItemConsumer>()
                 .InstancePerLifetimeScope();

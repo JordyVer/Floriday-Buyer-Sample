@@ -41,7 +41,6 @@ IHost host = Host.CreateDefaultBuilder(args)
     .ConfigureServices((hostContext, services) =>
     {
         services.AddMediatR(typeof(CreateTestCommand).Assembly);
-
         services.AddHostedService<Worker<TrustedTenant, TrustedTenantUser>>();
         services.Configure<SingleDbConnectionOptions>(options => { options.ConnectionString = hostContext.Configuration["ConnectionString"]; });
         services.AddServiceHealthChecks().AddQuartzHealthCheck();

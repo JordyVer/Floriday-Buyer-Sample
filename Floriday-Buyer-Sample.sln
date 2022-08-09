@@ -5,13 +5,15 @@ VisualStudioVersion = 17.2.32630.192
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Floriday-Buyer-Sample", "Floriday-Buyer-Sample\Floriday-Buyer-Sample.csproj", "{D6B31D3D-F21C-4603-B659-365F4DB69ECC}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Floriday-Buyer.WorkerService", "Floriday-Buyer.WokerService\Floriday-Buyer.WorkerService.csproj", "{BD52CB15-BBCB-46D4-8351-642BCC99597A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Floriday-Buyer.WorkerService", "Floriday-Buyer.WorkerService\Floriday-Buyer.WorkerService.csproj", "{BD52CB15-BBCB-46D4-8351-642BCC99597A}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Floriday-Buyer.Preprocessor.WorkerService", "Floriday-Buyer.Preprocessor.WorkerService\Floriday-Buyer.Preprocessor.WorkerService.csproj", "{B261B8BA-EF63-4942-B347-9957AA518A9E}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ProcessingQueue", "ProcessingQueue\ProcessingQueue.csproj", "{6655AA8C-969C-4B76-BB37-FAEDCAB9294A}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Floriday-Buyer-Sample.Shared", "Floriday-Buyer-Sample.Shared\Floriday-Buyer-Sample.Shared.csproj", "{155A2A6F-6B7A-4610-90C1-C6FEF35B9FBF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Floriday-Buyer-Sample.BackgroundTasks", "Floriday-Buyer-Sample.BackgroundTasks\Floriday-Buyer-Sample.BackgroundTasks.csproj", "{23EA5F3C-A280-4DEB-A434-91899BE664F1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -39,6 +41,10 @@ Global
 		{155A2A6F-6B7A-4610-90C1-C6FEF35B9FBF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{155A2A6F-6B7A-4610-90C1-C6FEF35B9FBF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{155A2A6F-6B7A-4610-90C1-C6FEF35B9FBF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{23EA5F3C-A280-4DEB-A434-91899BE664F1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{23EA5F3C-A280-4DEB-A434-91899BE664F1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{23EA5F3C-A280-4DEB-A434-91899BE664F1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{23EA5F3C-A280-4DEB-A434-91899BE664F1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
