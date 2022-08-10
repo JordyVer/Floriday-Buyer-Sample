@@ -1,6 +1,5 @@
-﻿using Axerrio.BB.DDD.Domain.Multitenancy.Abstractions;
-using Axerrio.BB.DDD.Infrastructure.Multitenancy.TenantResolvers.Abstractions;
-using Azure.Messaging.ServiceBus;
+﻿using Axerrio.BB.DDD.Domain.IntegrationEvents.Abstractions;
+using Axerrio.BB.DDD.Domain.Multitenancy.Abstractions;
 using EnsureThat;
 using Microsoft.Extensions.Logging;
 using ProcessingQueue.Domain.ProcessingQueueItems;
@@ -8,33 +7,33 @@ using ProcessingQueue.Infrastructure.Abstractions;
 
 namespace ProcessingQueue.Infrastructure
 {
-    public class ProcessingQueueItemIntegrationEventPublisher<TTenant, TTenantUser> : IProcessingQueueItemPublisher<ServiceBusMessage>
+    public class ProcessingQueueItemIntegrationEventPublisher<TTenant, TTenantUser> : IProcessingQueueItemPublisher<IntegrationEvent>
         where TTenant : class, ITenant
         where TTenantUser : TenantUser, ITenantUser
     {
         private readonly ILogger<ProcessingQueueItemIntegrationEventPublisher<TTenant, TTenantUser>> _logger;
-        private readonly ITenantResolver<TTenant, ServiceBusMessage> _tenantResolver;
-        private readonly ITenantUserResolver<TTenant, TTenantUser, ServiceBusMessage> _tenantUserResolver;
+        private readonly ITenantContextAccessor<TTenant> _tenantContextAccessor;
+        private readonly ITenantContextAccessor<TTenant, TTenantUser> _tenantUserContextAccessor;
         private readonly ProcessingQueueItemDbContext _context;
 
         public ProcessingQueueItemIntegrationEventPublisher(ILogger<ProcessingQueueItemIntegrationEventPublisher<TTenant, TTenantUser>> logger,
-            ITenantResolver<TTenant, ServiceBusMessage> tenantResolver,
-            ITenantUserResolver<TTenant, TTenantUser, ServiceBusMessage> tenantUserResolver,
+            ITenantContextAccessor<TTenant> tenantContextAccessor,
+            ITenantContextAccessor<TTenant, TTenantUser> tenantUserContextAccessor,
             ProcessingQueueItemDbContext context)
         {
             _logger = EnsureArg.IsNotNull(logger, nameof(logger));
             _context = EnsureArg.IsNotNull(context, nameof(context));
-            _tenantResolver = EnsureArg.IsNotNull(tenantResolver, nameof(tenantResolver));
-            _tenantUserResolver = EnsureArg.IsNotNull(tenantUserResolver, nameof(tenantUserResolver));
+            _tenantContextAccessor = EnsureArg.IsNotNull(tenantContextAccessor, nameof(tenantContextAccessor));
+            _tenantUserContextAccessor = EnsureArg.IsNotNull(tenantUserContextAccessor, nameof(tenantUserContextAccessor));
         }
 
-        public async Task PublishAsync<TQueueItem>(ServiceBusMessage context, string entityName, string instanceKey, TQueueItem queueItem, Guid queueItemId, CancellationToken cancellationToken = default)
+        public async Task PublishAsync<TQueueItem>(IntegrationEvent context, string entityName, string instanceKey, TQueueItem queueItem, Guid queueItemId, CancellationToken cancellationToken = default)
         {
-            var tenant = await _tenantResolver.ResolveAsync(context, cancellationToken);
+            var tenantId = _tenantContextAccessor.TenantContext.Tenant.TenantId;
 
-            var tenantUser = await _tenantUserResolver.ResolveAsync(tenant, context, cancellationToken);
+            var tenantUserId = _tenantUserContextAccessor.TenantContext.TenantUser.UserId;
 
-            var processingQueueItem = ProcessingQueueItem.Create(entityName, instanceKey, tenant.TenantId, tenantUser.UserId, queueItem, queueItemId);
+            var processingQueueItem = ProcessingQueueItem.Create(entityName, instanceKey, tenantId, tenantUserId, queueItem, queueItemId);
 
             await PublishAsync(processingQueueItem, cancellationToken);
         }

@@ -1,11 +1,9 @@
 using Axerrio.BB.AspNetCore.Infrastructure.ModelBinders.Request;
 using Axerrio.BB.DDD.Domain.IntegrationEvents.Abstractions;
-using Azure.Messaging.ServiceBus;
 using Floriday_Buyer_Sample.Shared.Application.Commands;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ProcessingQueue.Infrastructure.Abstractions;
-using System.Text.Json;
 
 namespace Floriday_Buyer_Sample.Controllers
 {
@@ -31,12 +29,13 @@ namespace Floriday_Buyer_Sample.Controllers
 
         [HttpPost("servicebus")]
         [Authorize]
-        public async Task<IResult> GetTestResultAsync([FromBody] CreateTestCommand command, [FromServices] IProcessingQueueItemPublisher<ServiceBusMessage> publisher)
+        public async Task<IResult> GetTestResultAsync([FromServices] IProcessingQueueItemPublisher<IntegrationEvent> publisher)
         {
-            // Mocked een servibus handler met tenant id en userid (in dit geval komt het van de http header.) 
-            var integrationEvent = new ServiceBusMessage(JsonSerializer.Serialize(new PricelistCreatedIntegrationEvent(command.TestKey)));
-            integrationEvent.ApplicationProperties.Add("x-tenant-id", HttpContext.Request.Headers["x-tenant-id"].ToString());
-            integrationEvent.ApplicationProperties.Add("x-user-id", HttpContext.Request.Headers["x-user-id"].ToString());
+            // Mocked een IE handler met tenant id en userid (in dit geval komt het van de http header.)
+            // normal wordt dit in AzureServiceBusEventBus.Consumer al gezet op de tenantcontextaccesssor.
+            var command = new CreateTestCommand();
+
+            var integrationEvent = new TestIntegrationEvent();
 
             await publisher.PublishAsync(integrationEvent, "TestItem", command.TestKey.ToString(), command, RequestId.Create());
 
@@ -44,13 +43,8 @@ namespace Floriday_Buyer_Sample.Controllers
         }
     }
 
-    public class PricelistCreatedIntegrationEvent : IntegrationEvent
+    public class TestIntegrationEvent : IntegrationEvent
     {
-        public int PartyKey { get; }
-
-        public PricelistCreatedIntegrationEvent(int partyKey)
-        {
-            PartyKey = partyKey;
-        }
+        public int TestKey { get; set; }
     }
 }

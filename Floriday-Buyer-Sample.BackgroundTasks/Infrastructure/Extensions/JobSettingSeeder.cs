@@ -1,9 +1,8 @@
 ﻿using Axerrio.BB.DDD.Job.Domain.Aggregates.JobSettingAggregate;
 using Axerrio.BB.DDD.Job.Infrastructure;
-using Floriday_Buyer.Preprocessor.WorkerService.BackgroundTasks;
 using Floriday_Buyer.Shared.BackgroundTasks;
 
-namespace Floriday_Buyer.Preprocessor.WorkerService.Infrastructure.Extensions
+namespace Floriday_Buyer_Sample.BackgroundTasks.Infrastructure.Extensions
 {
     public static class JobSettingSeeder
     {
@@ -12,7 +11,8 @@ namespace Floriday_Buyer.Preprocessor.WorkerService.Infrastructure.Extensions
             var currentJobSettings = context.JobSettings.ToList();
             var seedJobSettings = new List<JobSetting>
             {
-               JobSetting.Create((int)JobIdentifiers.WorkService, nameof(WorkServiceEventTimedJob), "0 0/1 * 1/1 * ? *", true),
+               JobSetting.Create((int)JobIdentifiers.CleanupEvents, "CleanupEventsEventTimedJob", "0 0/1 * 1/1 * ? *", true),
+               JobSetting.Create((int)JobIdentifiers.NotifyFailed, "NotifyFailedEventTimedJob", "0 0/1 * 1/1 * ? *", true),
             };
 
             var jobSettings = seedJobSettings

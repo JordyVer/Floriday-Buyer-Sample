@@ -13,22 +13,6 @@ namespace Floriday_Buyer.Preprocessor.WorkerService.BackgroundTasks
     {
         private readonly ILogger<HostedService> _logger;
 
-        public async Task RestartScheduler(CancellationToken stoppingToken)
-        {
-            using (_logger.BeginScope("{Context} -", $"{nameof(PreprocessingEventHostedService)}"))
-            {
-                _logger.LogInformation("Stopping the hosted service");
-
-                await base.StopAsync(stoppingToken);
-
-                _logger.LogInformation("Hosted service was stopped, attempting to restart now");
-
-                await base.ExecuteAsync(stoppingToken);
-
-                _logger.LogInformation("HostedService was started");
-            }
-        }
-
         public PreprocessingEventHostedService(ILogger<HostedService> logger, IJobFactory jobFactory, IJobSettingRepository jobSettingRepository, QuartzSchedulerListener listener) : base(logger, jobFactory, listener)
         {
             _logger = EnsureArg.IsNotNull(logger, nameof(logger));
